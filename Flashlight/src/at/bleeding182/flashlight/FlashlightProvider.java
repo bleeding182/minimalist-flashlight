@@ -1,36 +1,25 @@
 package at.bleeding182.flashlight;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
-import android.os.AsyncTask;
+import android.content.SharedPreferences;
 import android.widget.RemoteViews;
 
 public class FlashlightProvider extends AppWidgetProvider {
-
-	/**
-	 * Camera instance.
-	 */
-	private static Camera cam;
-	/**
-	 * Current state of flash / camera.
-	 */
-	private static boolean flashOn;
-
 	/**
 	 * Action to toggle camera on/off for the intent.
 	 */
 	private static final String TOGGLE_ACTION = "at.bleeding182.flashlight.TOGGLE";
+	private static final String FLASH_STATE = "flashState";
 
-	/**
-	 * Task used for turning on the camera.
-	 */
-	private static AsyncTask<Void, Void, Void> toggler;
+	public static final String START = "start";
+	public static final String STOP = "stop";
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -41,6 +30,8 @@ public class FlashlightProvider extends AppWidgetProvider {
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0,
 				intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+		boolean flashOn = context.getSharedPreferences(getClass().getName(), 0)
+				.getBoolean(FLASH_STATE, false);
 		for (int widgetId : appWidgetIds) {
 			RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
 					R.layout.widget_layout);
@@ -54,66 +45,54 @@ public class FlashlightProvider extends AppWidgetProvider {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		// Not mine
 		if (!intent.getAction().equals(TOGGLE_ACTION)) {
 			super.onReceive(context, intent);
 			return;
 		}
-		if (toggler != null && toggler.getStatus() != AsyncTask.Status.FINISHED) {
-			return;
-		}
+
+		SharedPreferences settings = context.getSharedPreferences(getClass()
+				.getName(), 0);
+		boolean flashOn = settings.getBoolean(FLASH_STATE, false);
 		if (flashOn) {
-			stopCamera();
+			if (!isMyServiceRunning(context))
+				return;
+			context.startService(new Intent(context, FlashlightService.class)
+					.setAction(START));
 		} else {
-			flashOn = true;
-			toggler = new StartWorker();
-			toggler.execute();
+			if (isMyServiceRunning(context))
+				return;
+			context.startService(new Intent(context, FlashlightService.class)
+					.setAction(STOP));
 		}
 		AppWidgetManager appWidgetManager = AppWidgetManager
 				.getInstance(context);
+		settings.edit().putBoolean(FLASH_STATE, !flashOn).apply();
 		for (int widgetId : appWidgetManager.getAppWidgetIds(new ComponentName(
 				context, FlashlightProvider.class))) {
 			RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
 					R.layout.widget_layout);
 			remoteViews.setImageViewResource(R.id.update,
-					flashOn ? R.drawable.standby_on : R.drawable.standby_off);
+					flashOn ? R.drawable.standby_off : R.drawable.standby_on);
 			appWidgetManager.updateAppWidget(widgetId, remoteViews);
 		}
 	}
 
-	private class StartWorker extends AsyncTask<Void, Void, Void> {
-		@Override
-		protected Void doInBackground(Void... params) {
-			try {
-				cam = Camera.open();
-			} catch (RuntimeException e) {
-				stopCamera();
-				return null;
+	private boolean isMyServiceRunning(Context context) {
+		ActivityManager manager = (ActivityManager) context
+				.getSystemService(Context.ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager
+				.getRunningServices(Integer.MAX_VALUE)) {
+			if (FlashlightService.class.getName().equals(
+					service.service.getClassName())) {
+				return true;
 			}
-			Parameters p = cam.getParameters();
-			p.setFlashMode(Parameters.FLASH_MODE_TORCH);
-			cam.setParameters(p);
-			cam.startPreview(); // Not needed for all devices it seems.
-			return null;
 		}
-	}
-
-	/**
-	 * Stops the camera and sets the instance to null.
-	 */
-	private void stopCamera() {
-		flashOn = false;
-		if (cam != null) {
-			cam.stopPreview();
-			cam.release();
-		}
-		cam = null;
+		return false;
 	}
 
 	@Override
 	public void onDisabled(Context context) {
-		super.onDisabled(context);
-		stopCamera();
+		context.stopService(new Intent(context, FlashlightService.class));
 	}
 
 }
