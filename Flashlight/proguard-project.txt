@@ -23,3 +23,9 @@
 #-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
 
 -optimizationpasses 100
+
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}

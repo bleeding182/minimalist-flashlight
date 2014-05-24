@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.IBinder;
+import android.util.Log;
 
 public class FlashlightService extends Service {
 
@@ -20,6 +21,7 @@ public class FlashlightService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.d("FlashlightService", "Starting " + intent.getAction());
 		if (intent.getAction().equals(FlashlightProvider.START)) {
 			startCamera();
 		} else {

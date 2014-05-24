@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 public class FlashlightProvider extends AppWidgetProvider {
@@ -24,6 +25,7 @@ public class FlashlightProvider extends AppWidgetProvider {
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
+		Log.d("FlashlightProvider", "Update");
 		Intent intent = new Intent(context, FlashlightProvider.class);
 		intent.setAction(FlashlightProvider.TOGGLE_ACTION);
 
@@ -53,16 +55,17 @@ public class FlashlightProvider extends AppWidgetProvider {
 		SharedPreferences settings = context.getSharedPreferences(getClass()
 				.getName(), 0);
 		boolean flashOn = settings.getBoolean(FLASH_STATE, false);
+		Log.d("FlashlightProvider", "Toggle !" + flashOn);
 		if (flashOn) {
 			if (!isMyServiceRunning(context))
 				return;
 			context.startService(new Intent(context, FlashlightService.class)
-					.setAction(START));
+					.setAction(STOP));
 		} else {
 			if (isMyServiceRunning(context))
 				return;
 			context.startService(new Intent(context, FlashlightService.class)
-					.setAction(STOP));
+					.setAction(START));
 		}
 		AppWidgetManager appWidgetManager = AppWidgetManager
 				.getInstance(context);
@@ -92,6 +95,7 @@ public class FlashlightProvider extends AppWidgetProvider {
 
 	@Override
 	public void onDisabled(Context context) {
+		Log.d("FlashlightProvider", "Disabled");
 		context.stopService(new Intent(context, FlashlightService.class));
 	}
 
