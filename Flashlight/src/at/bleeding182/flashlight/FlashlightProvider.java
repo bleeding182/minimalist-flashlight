@@ -13,34 +13,40 @@ import android.widget.RemoteViews;
 
 public class FlashlightProvider extends AppWidgetProvider {
 
+	/**
+	 * Camera instance.
+	 */
 	private static Camera cam;
+	/**
+	 * Current state of flash / camera.
+	 */
 	private static boolean flashOn;
 
-	private static volatile AsyncTask<Void, Void, Void> toggler;
+	/**
+	 * Action to toggle camera on/off for the intent.
+	 */
+	private static final String TOGGLE_ACTION = "at.bleeding182.flashlight.TOGGLE";
+
+	/**
+	 * Task used for turning on the camera.
+	 */
+	private static AsyncTask<Void, Void, Void> toggler;
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
+		Intent intent = new Intent(context, FlashlightProvider.class);
+		intent.setAction(FlashlightProvider.TOGGLE_ACTION);
 
-		ComponentName thisWidget = new ComponentName(context,
-				FlashlightProvider.class);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0,
+				intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
-
-		for (int widgetId : allWidgetIds) {
+		for (int widgetId : appWidgetIds) {
 			RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
 					R.layout.widget_layout);
 			remoteViews.setImageViewResource(R.id.update,
 					flashOn ? R.drawable.standby_on : R.drawable.standby_off);
 
-			Intent intent = new Intent(context, FlashlightProvider.class);
-
-			intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
-			intent.putExtra("toggle", true);
-
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-					0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			remoteViews.setOnClickPendingIntent(R.id.update, pendingIntent);
 			appWidgetManager.updateAppWidget(widgetId, remoteViews);
 		}
@@ -48,45 +54,53 @@ public class FlashlightProvider extends AppWidgetProvider {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		// Not mine
+		if (!intent.getAction().equals(TOGGLE_ACTION)) {
+			super.onReceive(context, intent);
+			return;
+		}
 		if (toggler != null && toggler.getStatus() != AsyncTask.Status.FINISHED) {
 			return;
 		}
-
-		if (intent.getBooleanExtra("toggle", false)) {
-			if (flashOn) {
-				stopCamera();
-			} else {
-				flashOn = true;
-				toggler = new StartWorker();
-				toggler.execute();
-			}
-		}
-		super.onReceive(context, intent);
-
-	}
-
-	private void startCamera() {
-		flashOn = true;
-		try {
-			cam = Camera.open();
-		} catch (RuntimeException e) {
+		if (flashOn) {
 			stopCamera();
-			return;
+		} else {
+			flashOn = true;
+			toggler = new StartWorker();
+			toggler.execute();
 		}
-		Parameters p = cam.getParameters();
-		p.setFlashMode(Parameters.FLASH_MODE_TORCH);
-		cam.setParameters(p);
-		cam.startPreview();
+		AppWidgetManager appWidgetManager = AppWidgetManager
+				.getInstance(context);
+		for (int widgetId : appWidgetManager.getAppWidgetIds(new ComponentName(
+				context, FlashlightProvider.class))) {
+			RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
+					R.layout.widget_layout);
+			remoteViews.setImageViewResource(R.id.update,
+					flashOn ? R.drawable.standby_on : R.drawable.standby_off);
+			appWidgetManager.updateAppWidget(widgetId, remoteViews);
+		}
 	}
 
 	private class StartWorker extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected Void doInBackground(Void... params) {
-			startCamera();
+			try {
+				cam = Camera.open();
+			} catch (RuntimeException e) {
+				stopCamera();
+				return null;
+			}
+			Parameters p = cam.getParameters();
+			p.setFlashMode(Parameters.FLASH_MODE_TORCH);
+			cam.setParameters(p);
+			cam.startPreview(); // Not needed for all devices it seems.
 			return null;
 		}
 	}
 
+	/**
+	 * Stops the camera and sets the instance to null.
+	 */
 	private void stopCamera() {
 		flashOn = false;
 		if (cam != null) {
