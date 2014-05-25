@@ -16,11 +16,8 @@ public class FlashlightProvider extends AppWidgetProvider {
 	/**
 	 * Action to toggle camera on/off for the intent.
 	 */
-	private static final String TOGGLE_ACTION = "at.bleeding182.flashlight.TOGGLE";
+	public static final String TOGGLE_ACTION = "at.bleeding182.flashlight.TOGGLE";
 	private static final String FLASH_STATE = "flashState";
-
-	public static final String START = "start";
-	public static final String STOP = "stop";
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -47,6 +44,7 @@ public class FlashlightProvider extends AppWidgetProvider {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		Log.v(getClass().getSimpleName(), intent.getAction());
 		if (!intent.getAction().equals(TOGGLE_ACTION)) {
 			super.onReceive(context, intent);
 			return;
@@ -55,18 +53,18 @@ public class FlashlightProvider extends AppWidgetProvider {
 		SharedPreferences settings = context.getSharedPreferences(getClass()
 				.getName(), 0);
 		boolean flashOn = settings.getBoolean(FLASH_STATE, false);
-		Log.d("FlashlightProvider", "Toggle !" + flashOn);
+		Log.d("FlashlightProvider", "Flash was  " + flashOn);
+		// Ignore if it is already in the wanted state (e.g. spamming button)
 		if (flashOn) {
-			if (!isMyServiceRunning(context))
+			if (!context.stopService(new Intent(context,
+					FlashlightService.class)))
 				return;
-			context.startService(new Intent(context, FlashlightService.class)
-					.setAction(STOP));
 		} else {
 			if (isMyServiceRunning(context))
 				return;
-			context.startService(new Intent(context, FlashlightService.class)
-					.setAction(START));
+			context.startService(new Intent(context, FlashlightService.class));
 		}
+
 		AppWidgetManager appWidgetManager = AppWidgetManager
 				.getInstance(context);
 		settings.edit().putBoolean(FLASH_STATE, !flashOn).apply();
@@ -96,6 +94,8 @@ public class FlashlightProvider extends AppWidgetProvider {
 	@Override
 	public void onDisabled(Context context) {
 		Log.d("FlashlightProvider", "Disabled");
+		context.getSharedPreferences(getClass().getName(), 0).edit()
+				.putBoolean(FLASH_STATE, false).apply();
 		context.stopService(new Intent(context, FlashlightService.class));
 	}
 
