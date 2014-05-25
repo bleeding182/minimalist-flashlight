@@ -7,6 +7,6 @@
     android:background="@null"
     android:contentDescription="@string/app_name"
     android:gravity="center_horizontal|center_vertical"
-    android:padding="5dp"
-    android:scaleType="centerCrop"
+    android:padding="1dp"
+    android:scaleType="centerInside"
     android:src="@drawable/standby_off" />
