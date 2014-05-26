@@ -1,7 +1,5 @@
 package at.bleeding182.flashlight;
 
-import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.app.Service;
 import android.content.Intent;
 import android.hardware.Camera;
@@ -36,18 +34,8 @@ public class FlashlightService extends Service {
 		} catch (RuntimeException e) {
 			Toast.makeText(getApplicationContext(), "Could not access camera.",
 					Toast.LENGTH_SHORT).show();
-
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(
-					getApplication(), 0, new Intent(getApplication(),
-							FlashlightProvider.class)
-							.setAction(FlashlightProvider.TOGGLE_ACTION),
-					PendingIntent.FLAG_UPDATE_CURRENT);
-			try {
-				pendingIntent.send();
-			} catch (CanceledException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			sendBroadcast(new Intent(getApplication(), FlashlightProvider.class)
+					.setAction(FlashlightProvider.TOGGLE_ACTION));
 		}
 		return START_NOT_STICKY;
 	}

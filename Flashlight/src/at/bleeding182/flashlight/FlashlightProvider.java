@@ -78,7 +78,7 @@ public class FlashlightProvider extends AppWidgetProvider {
 		}
 	}
 
-	private boolean isMyServiceRunning(Context context) {
+	private static boolean isMyServiceRunning(Context context) {
 		ActivityManager manager = (ActivityManager) context
 				.getSystemService(Context.ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager

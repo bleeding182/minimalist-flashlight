@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="at.bleeding182.flashlight"
-    android:versionCode="8"
-    android:versionName="1.24" >
+    android:versionCode="9"
+    android:versionName="1.25" >
 
     <uses-sdk
         android:minSdkVersion="16"
