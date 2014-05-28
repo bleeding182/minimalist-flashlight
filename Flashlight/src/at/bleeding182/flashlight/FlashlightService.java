@@ -1,6 +1,5 @@
 package at.bleeding182.flashlight;
 
-import java.io.IOException;
 import java.util.List;
 
 import android.app.Service;
@@ -47,10 +46,8 @@ public class FlashlightService extends Service {
 			cam.setPreviewTexture(new SurfaceTexture(0));
 			cam.startPreview();
 			return START_NOT_STICKY;
-		} catch (RuntimeException e) {
+		} catch (Exception e) {
 			return error(this, "Could not access camera.");
-		} catch (IOException e) {
-			return error(this, "Could not activate camera.");
 		}
 	}
 
