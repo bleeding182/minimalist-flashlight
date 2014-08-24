@@ -89,6 +89,12 @@ public class FlashlightProvider extends BroadcastReceiver {
 		update(context, AppWidgetManager.getInstance(context), flashOn);
 	}
 
+	/**
+	 * What to do when the lase instance of the widget is removed. It stops the
+	 * service and sets the status in the preferences to off.
+	 * 
+	 * @param context
+	 */
 	public static void onDisabled(Context context) {
 		Log.d("FlashlightProvider", "Disabled");
 		setFlashState(context.getSharedPreferences(

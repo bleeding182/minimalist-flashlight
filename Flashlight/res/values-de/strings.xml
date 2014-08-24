@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="app_name">Taschenlampe</string>
+    <string name="err_available">Licht nicht verfügbar.</string>
+    <string name="err_access">Kann nicht auf Licht zugreifen.</string>
+
+</resources>

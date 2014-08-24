@@ -1,5 +1,7 @@
 <resources>
 
     <string name="app_name">Flashlight</string>
+    <string name="err_available">Flash not available.</string>
+    <string name="err_access">Could not access camera.</string>
 
 </resources>

@@ -9,6 +9,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,6 +19,7 @@ public class FlashlightService extends Service {
 	 * Camera instance.
 	 */
 	private Camera cam;
+	private PowerManager.WakeLock wl;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -34,25 +36,30 @@ public class FlashlightService extends Service {
 			Parameters p = cam.getParameters();
 			List<String> flashes = p.getSupportedFlashModes();
 			if (flashes == null)
-				return error(this, "Flash not available.");
+				return error(this, R.string.err_available);
 			if (flashes.contains(Parameters.FLASH_MODE_TORCH))
 				p.setFlashMode(Parameters.FLASH_MODE_TORCH);
 			else if (flashes.contains(Parameters.FLASH_MODE_ON))
 				p.setFlashMode(Parameters.FLASH_MODE_ON);
 			else
-				return error(this, "Flash not available.");
+				return error(this, R.string.err_available);
 			cam.setParameters(p);
 			// Not needed for all devices.
 			cam.setPreviewTexture(new SurfaceTexture(0));
 			cam.startPreview();
+			wl = ((PowerManager) getSystemService(Context.POWER_SERVICE))
+					.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+							"FlashlightService");
+			wl.acquire();
 			return START_NOT_STICKY;
 		} catch (Exception e) {
-			return error(this, "Could not access camera.");
+			return error(this, R.string.err_access);
 		}
 	}
 
-	private static int error(Context context, String toast) {
-		Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
+	private static int error(Context context, int toast) {
+		Toast.makeText(context, context.getString(toast), Toast.LENGTH_SHORT)
+				.show();
 		context.sendBroadcast(new Intent(context, FlashlightProvider.class)
 				.setAction(FlashlightProvider.TOGGLE_ACTION));
 		return START_NOT_STICKY;
@@ -62,6 +69,7 @@ public class FlashlightService extends Service {
 	public void onDestroy() {
 		Log.v("FlashlightService", "Flash Service destroyed");
 		stopCamera();
+		wl.release();
 		super.onDestroy();
 	}
 

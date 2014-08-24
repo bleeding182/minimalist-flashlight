@@ -4,9 +4,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="@null"
     android:contentDescription="@string/app_name"
     android:gravity="center_horizontal|center_vertical"
-    android:padding="1dp"
+    android:padding="2dp"
     android:scaleType="centerInside"
     android:src="@drawable/standby_off" />
