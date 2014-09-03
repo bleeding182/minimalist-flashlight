@@ -13,12 +13,21 @@ import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * Service to access the camera flash and keep the flash running.
+ * 
+ * @author David Medenjak 2014
+ * 
+ */
 public class FlashlightService extends Service {
 
 	/**
-	 * Camera instance.
+	 * Camera instance to access the flash.
 	 */
 	private Camera cam;
+	/**
+	 * Wakelock to keep flashlight running with screen off.
+	 */
 	private PowerManager.WakeLock wl;
 
 	@Override
@@ -44,22 +53,35 @@ public class FlashlightService extends Service {
 			else
 				return error(this, R.string.err_available);
 			cam.setParameters(p);
-			// Not needed for all devices.
+			// Needed for some devices.
 			cam.setPreviewTexture(new SurfaceTexture(0));
+			// Needed for some more devices.
 			cam.startPreview();
+
+			// Keep phone awake with screen off
 			wl = ((PowerManager) getSystemService(Context.POWER_SERVICE))
 					.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 							"FlashlightService");
-			wl.acquire();
+			if (wl != null && !wl.isHeld())
+				wl.acquire();
 			return START_NOT_STICKY;
 		} catch (Exception e) {
 			return error(this, R.string.err_access);
 		}
 	}
 
-	private static int error(Context context, int toast) {
-		Toast.makeText(context, context.getString(toast), Toast.LENGTH_SHORT)
-				.show();
+	/**
+	 * Toasting an error message.
+	 * 
+	 * @param context
+	 *            the application context.
+	 * @param messageRessource
+	 *            the id of the message to display.
+	 * @return
+	 */
+	private static int error(Context context, int messageRessource) {
+		Toast.makeText(context, context.getString(messageRessource),
+				Toast.LENGTH_SHORT).show();
 		context.sendBroadcast(new Intent(context, FlashlightProvider.class)
 				.setAction(FlashlightProvider.TOGGLE_ACTION));
 		return START_NOT_STICKY;
@@ -69,7 +91,11 @@ public class FlashlightService extends Service {
 	public void onDestroy() {
 		Log.v("FlashlightService", "Flash Service destroyed");
 		stopCamera();
-		wl.release();
+		if (wl != null) {
+			if (wl.isHeld())
+				wl.release();
+			wl = null;
+		}
 		super.onDestroy();
 	}
 
