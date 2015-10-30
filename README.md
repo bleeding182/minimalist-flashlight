@@ -1,6 +1,7 @@
 #Flashlight Widget for Android
-Small and stable widget for android toggling the flash on/off.
+[![Circle CI](https://circleci.com/gh/bleeding182/minimalist-flashlight.svg?style=shield)](https://circleci.com/gh/bleeding182/minimalist-flashlight)
 
+Small and stable widget for android toggling the flash on/off.
 
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=G35W5EF2LMG76&lc=US&item_name=David%20Medenjak&currency_code=EUR&bn=PP-DonationsBF%3Abtn_donate_LG.gif%3ANonHosted) 
 
