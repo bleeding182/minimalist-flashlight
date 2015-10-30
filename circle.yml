@@ -1,4 +1,4 @@
 test:
   override:
     - ./gradlew assembleRelease
-    - cp -r minimalist-flashlight/build/outputs $CIRCLE_ARTIFACTS
+    - cp -r minimalist-flashlight/app/build/outputs $CIRCLE_ARTIFACTS
