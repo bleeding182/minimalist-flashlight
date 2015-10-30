@@ -1,0 +1,3 @@
+general:
+  artifacts:
+	- "outputs/apk"
