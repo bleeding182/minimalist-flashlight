@@ -31,6 +31,15 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
 
+    signingConfigs {
+        release {
+            storeFile "keystore"
+            storePassword "$System.env.STORE_PASSWORD"
+            keyAlias "bleeding182"
+            keyPassword "$System.env.KEY_PASSWORD"
+        }
+    }
+
     defaultConfig {
         applicationId "at.bleeding182.flashlight"
         targetSdkVersion 23
@@ -71,21 +80,6 @@ android {
         }
     }
 }
-
-task saveArtifacts(type: Copy) {
-    from('build/outputs/apk') {
-        exclude '*-unaligned.apk'
-    }
-    into "$System.env.CIRCLE_ARTIFACTS/apk"
-    onlyIf {
-        System.env['CIRCLE_ARTIFACTS'] != null
-    }
-}
-
-afterEvaluate {
-    test.finalizedBy(saveArtifacts)
-}
-
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])

@@ -1,3 +1,4 @@
-general:
-  artifacts:
-    - "outputs/apk"
+test:
+  override:
+    - ./gradlew assembleRelease
+    - cp -r minimalist-flashlight/build/outputs $CIRCLE_ARTIFACTS
