@@ -70,9 +70,22 @@ android {
                             .replace(".apk", "-vc${variant.versionCode}-${variant.versionName}.apk"))
         }
     }
+
 }
 
+task saveArtifacts(type: Copy) {
+    from('build/outputs/apk') {
+        exclude '*-unaligned.apk'
+    }
+    into "$System.env.CIRCLE_ARTIFACTS/apk"
+    onlyIf {
+        System.env['CIRCLE_ARTIFACTS'] != null
+    }
+}
 
+afterEvaluate {
+    test.finalizedBy(saveArtifacts)
+}
 
 
 dependencies {
