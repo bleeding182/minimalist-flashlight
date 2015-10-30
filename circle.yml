@@ -1,3 +1,3 @@
 general:
   artifacts:
-	- "outputs/apk"
+    - "outputs/apk"
