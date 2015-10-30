@@ -33,7 +33,7 @@ android {
 
     signingConfigs {
         release {
-            storeFile "keystore"
+            storeFile file("keystore")
             storePassword "$System.env.STORE_PASSWORD"
             keyAlias "bleeding182"
             keyPassword "$System.env.KEY_PASSWORD"
@@ -53,6 +53,7 @@ android {
 
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
