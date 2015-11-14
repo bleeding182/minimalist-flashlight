@@ -24,9 +24,13 @@
 
 package at.bleeding182.flashlight;
 
+import java.io.IOException;
 import java.util.List;
 
+import android.app.PendingIntent;
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.SurfaceTexture;
@@ -35,103 +39,174 @@ import android.hardware.Camera.Parameters;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 /**
  * Service to access the camera flash and keep the flash running.
- * 
+ *
  * @author David Medenjak 2014
- * 
  */
 public class FlashlightService extends Service {
+    /**
+     * Action to toggle flash on/off.
+     */
+    public static final String FLASH_ON = BuildConfig.APPLICATION_ID + ".FLASH_ON";
+    public static final String FLASH_OFF = BuildConfig.APPLICATION_ID + ".FLASH_OFF";
 
-	/**
-	 * Camera instance to access the flash.
-	 */
-	private Camera cam;
-	/**
-	 * Wakelock to keep flashlight running with screen off.
-	 */
-	private PowerManager.WakeLock wl;
+    /**
+     * Camera instance to access the flash.
+     */
+    @SuppressWarnings("deprecation")
+    private Camera mCamera;
+    /**
+     * Wakelock to keep flashlight running with screen off.
+     */
+    private PowerManager.WakeLock mWakeLock;
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		return null;
-	}
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.v("FlashlightService", "Starting Flash");
-		if (cam != null)
-			return START_NOT_STICKY;
-		try {
-			cam = Camera.open();
-			Parameters p = cam.getParameters();
-			List<String> flashes = p.getSupportedFlashModes();
-			if (flashes == null)
-				return error(this, R.string.err_available);
-			if (flashes.contains(Parameters.FLASH_MODE_TORCH))
-				p.setFlashMode(Parameters.FLASH_MODE_TORCH);
-			else if (flashes.contains(Parameters.FLASH_MODE_ON))
-				p.setFlashMode(Parameters.FLASH_MODE_ON);
-			else
-				return error(this, R.string.err_available);
-			cam.setParameters(p);
-			// Needed for some devices.
-			cam.setPreviewTexture(new SurfaceTexture(0));
-			// Needed for some more devices.
-			cam.startPreview();
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (BuildConfig.DEBUG) {
+            Log.v("FlashlightService", "onCreate");
+        }
+    }
 
-			// Keep phone awake with screen off
-			wl = ((PowerManager) getSystemService(Context.POWER_SERVICE))
-					.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-							"FlashlightService");
-			if (wl != null && !wl.isHeld())
-				wl.acquire();
-			return START_NOT_STICKY;
-		} catch (Exception e) {
-			return error(this, R.string.err_access);
-		}
-	}
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (BuildConfig.DEBUG) {
+            Log.v("FlashlightService", "onStartCommand " + (intent != null ? intent.getAction() : "none"));
+        }
+        if (intent != null) {
+            final String action = intent.getAction();
+            if (FLASH_ON.equals(action)) {
+                try {
+                    startCamera();
+                    updateWidgets(this, true);
+                    return START_STICKY;
+                } catch (Exception e) {
+                    Toast.makeText(this, R.string.err_available, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        updateWidgets(this, false);
+        stopSelf();
+        return START_NOT_STICKY;
+    }
 
-	/**
-	 * Toasting an error message.
-	 * 
-	 * @param context
-	 *            the application context.
-	 * @param messageRessource
-	 *            the id of the message to display.
-	 * @return
-	 */
-	private static int error(Context context, int messageRessource) {
-		Toast.makeText(context, context.getString(messageRessource),
-				Toast.LENGTH_SHORT).show();
-		context.sendBroadcast(new Intent(context, FlashlightProvider.class)
-				.setAction(FlashlightProvider.TOGGLE_ACTION));
-		return START_NOT_STICKY;
-	}
 
-	@Override
-	public void onDestroy() {
-		Log.v("FlashlightService", "Flash Service destroyed");
-		stopCamera();
-		if (wl != null) {
-			if (wl.isHeld())
-				wl.release();
-			wl = null;
-		}
-		super.onDestroy();
-	}
+    /**
+     * Sets up the Widget Layout.
+     *
+     * @param packageName   the name of the application package.
+     * @param flashState    the state of the flash.
+     * @param pendingIntent the intent to execute on click
+     * @return the initialized view.
+     */
 
-	/**
-	 * Stops the camera and sets the instance to null.
-	 */
-	private void stopCamera() {
-		if (cam != null) {
-			cam.stopPreview();
-			cam.release();
-		}
-		cam = null;
-	}
+    static RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
+        if (BuildConfig.DEBUG) {
+            Log.v("FlashlightService", "getRemoteViews");
+        }
+        final RemoteViews remoteViews = new RemoteViews(packageName, R.layout.widget_layout);
+        final int imageResource = flashState ? R.drawable.standby_on : R.drawable.standby_off;
+        remoteViews.setImageViewResource(R.id.update, imageResource);
+        remoteViews.setOnClickPendingIntent(R.id.update, pendingIntent);
+        return remoteViews;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (BuildConfig.DEBUG) {
+            Log.v("FlashlightService", "onDestroy");
+        }
+        stopCamera();
+        if (mWakeLock != null) {
+            if (mWakeLock.isHeld())
+                mWakeLock.release();
+            mWakeLock = null;
+        }
+        super.onDestroy();
+    }
+
+    /**
+     * Stops the camera and sets the instance to null.
+     */
+    private void stopCamera() {
+        if (BuildConfig.DEBUG) {
+            Log.v("FlashlightService", "stopCamera");
+        }
+        if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.release();
+        }
+        mCamera = null;
+        stopSelf();
+    }
+
+    public static void updateWidgets(Context context, boolean flashOn) {
+        if (BuildConfig.DEBUG) {
+            Log.v("FlashlightService", "updateWidgets");
+        }
+        final Intent intent = new Intent(context, FlashlightService.class);
+        intent.setAction(flashOn ? FLASH_OFF : FLASH_ON);
+        intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+
+        final PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        final RemoteViews views = getRemoteViews(context.getPackageName(), flashOn, pendingIntent);
+
+        AppWidgetManager.getInstance(context).updateAppWidget(
+                new ComponentName(context, FlashlightProvider.class), views);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void startCamera() throws IOException {
+        if (BuildConfig.DEBUG) {
+            Log.v("FlashlightService", "startCamera");
+        }
+        mCamera = Camera.open();
+        final Parameters parameters = mCamera.getParameters();
+        configFlashParameters(parameters);
+
+        // will work on some devices
+        mCamera.setParameters(parameters);
+        // Needed for some devices.
+        mCamera.setPreviewTexture(new SurfaceTexture(0));
+        // Needed for some more devices.
+        mCamera.startPreview();
+
+        // Keep phone awake with the screen off
+        if (mWakeLock == null) {
+            mWakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
+                    .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, BuildConfig.APPLICATION_ID);
+        }
+        if (!mWakeLock.isHeld()) {
+            mWakeLock.acquire();
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void configFlashParameters(Parameters p) {
+        if (BuildConfig.DEBUG) {
+            Log.v("FlashlightService", "configFlashParameters");
+        }
+        final List<String> flashes = p.getSupportedFlashModes();
+        if (flashes == null) {
+            throw new IllegalStateException("No flash available");
+        }
+        if (flashes.contains(Parameters.FLASH_MODE_TORCH)) {
+            p.setFlashMode(Parameters.FLASH_MODE_TORCH);
+        } else if (flashes.contains(Parameters.FLASH_MODE_ON)) {
+            p.setFlashMode(Parameters.FLASH_MODE_ON);
+        } else {
+            throw new IllegalStateException("No useable flash mode");
+        }
+    }
 
 }
