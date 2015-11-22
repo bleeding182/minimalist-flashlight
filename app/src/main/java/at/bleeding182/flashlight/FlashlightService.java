@@ -89,8 +89,11 @@ public class FlashlightService extends Service {
                     startCamera();
                     updateWidgets(this, true);
                     return START_STICKY;
-                } catch (Exception e) {
+                } catch (Exception ex) {
                     Toast.makeText(this, R.string.err_available, Toast.LENGTH_SHORT).show();
+                    if (BuildConfig.DEBUG) {
+                        Log.v("FlashlightService", "exception " + ex.getMessage());
+                    }
                 }
             }
         }

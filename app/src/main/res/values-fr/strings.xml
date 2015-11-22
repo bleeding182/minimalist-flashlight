@@ -24,7 +24,7 @@
 
 <resources>
 
-    <string name="app_name">Flashlight</string>
-    <string name="err_available">Flash not available</string>
+    <string name="app_name">Lampe de poche</string>
+    <string name="err_available">Flash pas disponible</string>
 
 </resources>
