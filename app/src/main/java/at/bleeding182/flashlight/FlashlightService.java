@@ -24,23 +24,21 @@
 
 package at.bleeding182.flashlight;
 
-import java.io.IOException;
-import java.util.List;
-
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
+import android.hardware.camera2.CameraManager;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
+import java.io.IOException;
 
 /**
  * Service to access the camera flash and keep the flash running.
@@ -55,14 +53,11 @@ public class FlashlightService extends Service {
     public static final String FLASH_OFF = BuildConfig.APPLICATION_ID + ".FLASH_OFF";
 
     /**
-     * Camera instance to access the flash.
-     */
-    @SuppressWarnings("deprecation")
-    private Camera mCamera;
-    /**
      * Wakelock to keep flashlight running with screen off.
      */
     private PowerManager.WakeLock mWakeLock;
+
+    private Flashlight mFlashlight;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -75,6 +70,7 @@ public class FlashlightService extends Service {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "onCreate");
         }
+        mFlashlight = Factory.getFlashlight(this);
     }
 
     @Override
@@ -134,6 +130,7 @@ public class FlashlightService extends Service {
                 mWakeLock.release();
             mWakeLock = null;
         }
+        updateWidgets(this, false);
         super.onDestroy();
     }
 
@@ -144,11 +141,7 @@ public class FlashlightService extends Service {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "stopCamera");
         }
-        if (mCamera != null) {
-            mCamera.stopPreview();
-            mCamera.release();
-        }
-        mCamera = null;
+        mFlashlight.turnFlashOff();
         stopSelf();
     }
 
@@ -173,16 +166,8 @@ public class FlashlightService extends Service {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "startCamera");
         }
-        mCamera = Camera.open();
-        final Parameters parameters = mCamera.getParameters();
-        configFlashParameters(parameters);
 
-        // will work on some devices
-        mCamera.setParameters(parameters);
-        // Needed for some devices.
-        mCamera.setPreviewTexture(new SurfaceTexture(0));
-        // Needed for some more devices.
-        mCamera.startPreview();
+        mFlashlight.turnFlashOn();
 
         // Keep phone awake with the screen off
         if (mWakeLock == null) {
@@ -194,22 +179,5 @@ public class FlashlightService extends Service {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    private void configFlashParameters(Parameters p) {
-        if (BuildConfig.DEBUG) {
-            Log.v("FlashlightService", "configFlashParameters");
-        }
-        final List<String> flashes = p.getSupportedFlashModes();
-        if (flashes == null) {
-            throw new IllegalStateException("No flash available");
-        }
-        if (flashes.contains(Parameters.FLASH_MODE_TORCH)) {
-            p.setFlashMode(Parameters.FLASH_MODE_TORCH);
-        } else if (flashes.contains(Parameters.FLASH_MODE_ON)) {
-            p.setFlashMode(Parameters.FLASH_MODE_ON);
-        } else {
-            throw new IllegalStateException("No useable flash mode");
-        }
-    }
 
 }

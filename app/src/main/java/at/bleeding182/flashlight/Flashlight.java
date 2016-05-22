@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 David Medenjak
+ * Copyright (c) 2016 David Medenjak
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,21 +22,17 @@
  * SOFTWARE.
  */
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
-    }
-}
+package at.bleeding182.flashlight;
 
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
+import java.io.IOException;
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+/**
+ * @author David Medenjak on 5/22/2016.
+ */
+public interface Flashlight {
+
+    void turnFlashOn() throws IOException;
+
+    void turnFlashOff();
+
 }
