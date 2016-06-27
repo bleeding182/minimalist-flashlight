@@ -14,9 +14,10 @@ import android.graphics.drawable.Drawable;
  */
 public class IconDrawable extends Drawable {
 
-    public static final int LIGHT_BACKGROUND = 0xffeeeeee;
+    public static final int LIGHT_BACKGROUND = 0xff22252b;
     private final float mRadius;
     private final float mShadowRadius;
+    private final RadialGradient mLightShadow;
     Paint mPaint = new Paint();
     private int mSize;
     private final RadialGradient mShadow;
@@ -28,7 +29,7 @@ public class IconDrawable extends Drawable {
 
 
         mRadius = mSize * (0.8f / 2f);
-        mShadowRadius = mSize * (0.95f / 2);
+        mShadowRadius = mSize * (0.98f / 2);
 
         float startRatio = mRadius / mShadowRadius;
         float midRatio = startRatio + ((1f - startRatio) / 2f);
@@ -37,18 +38,22 @@ public class IconDrawable extends Drawable {
                 new int[]{0, 0x44000000, 0x14000000, 0},
                 new float[]{0f, startRatio, midRatio, 1f},
                 Shader.TileMode.CLAMP);
+        mLightShadow = new RadialGradient(mSize / 2, mSize / 2, mShadowRadius,
+                new int[]{0, 0x6433b5e5, 0x1433b5e5, 0},
+                new float[]{0f, startRatio, midRatio, 1f},
+                Shader.TileMode.CLAMP);
     }
 
     @Override
     public void draw(Canvas canvas) {
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setShader(mShadow);
+        mPaint.setShader(mFlashOn ? mLightShadow : mShadow);
         canvas.drawCircle(mSize / 2, mSize / 2, mShadowRadius, mPaint);
         mPaint.setShader(null);
         mPaint.setColor(mFlashOn ? LIGHT_BACKGROUND : Color.BLACK);
         canvas.drawCircle(mSize / 2, mSize / 2, mRadius, mPaint);
 
-        mPaint.setColor(mFlashOn ? Color.BLACK : 0xff33b5e5);
+        mPaint.setColor(mFlashOn ? 0xff33b5e5 : 0xff888888);
         canvas.drawRect(mSize / 2 - mRadius * 0.1f, mSize / 2 - mRadius * 0.8f,
                 mSize / 2 + mRadius * 0.1f, mSize / 2 - mRadius * 0.1f, mPaint);
 

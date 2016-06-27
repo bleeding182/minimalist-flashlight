@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<at.bleeding182.flashlight.PreviewImageView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    android:layout_height="match_parent">
+
+    <at.bleeding182.flashlight.PreviewImageView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
+
+    <at.bleeding182.flashlight.PreviewImageView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"/>
+</LinearLayout>
