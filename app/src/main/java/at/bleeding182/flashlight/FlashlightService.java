@@ -24,16 +24,16 @@
 
 package at.bleeding182.flashlight;
 
-import java.io.IOException;
-import java.util.List;
-
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.IBinder;
@@ -41,6 +41,9 @@ import android.os.PowerManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Service to access the camera flash and keep the flash running.
@@ -53,6 +56,10 @@ public class FlashlightService extends Service {
      */
     public static final String FLASH_ON = BuildConfig.APPLICATION_ID + ".FLASH_ON";
     public static final String FLASH_OFF = BuildConfig.APPLICATION_ID + ".FLASH_OFF";
+
+    private Bitmap mBitmap;
+    private Canvas mCanvas;
+    private IconDrawable mDrawable;
 
     /**
      * Camera instance to access the flash.
@@ -75,6 +82,10 @@ public class FlashlightService extends Service {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "onCreate");
         }
+        int size = getResources().getDimensionPixelSize(R.dimen.size);
+        mBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
+        mDrawable = new IconDrawable(size);
     }
 
     @Override
@@ -112,13 +123,14 @@ public class FlashlightService extends Service {
      * @return the initialized view.
      */
 
-    static RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
+    RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "getRemoteViews");
         }
         final RemoteViews remoteViews = new RemoteViews(packageName, R.layout.widget_layout);
-        final int imageResource = flashState ? R.drawable.standby_on : R.drawable.standby_off;
-        remoteViews.setImageViewResource(R.id.update, imageResource);
+        mDrawable.setFlashOn(flashState);
+        mDrawable.draw(mCanvas);
+        remoteViews.setImageViewBitmap(R.id.update, mBitmap);
         remoteViews.setOnClickPendingIntent(R.id.update, pendingIntent);
         return remoteViews;
     }
@@ -152,7 +164,7 @@ public class FlashlightService extends Service {
         stopSelf();
     }
 
-    public static void updateWidgets(Context context, boolean flashOn) {
+    public void updateWidgets(Context context, boolean flashOn) {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "updateWidgets");
         }
