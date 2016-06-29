@@ -22,17 +22,50 @@
  * SOFTWARE.
  */
 
-package at.bleeding182.flashlight;
+package at.bleeding182.flashlight.api;
+
+import android.annotation.TargetApi;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
+import android.os.Build;
+import android.util.Log;
 
 import java.io.IOException;
+
+import at.bleeding182.flashlight.BuildConfig;
 
 /**
  * @author David Medenjak on 5/22/2016.
  */
-public interface Flashlight {
+@TargetApi(Build.VERSION_CODES.M)
+public class Api23Flashlight implements Flashlight {
 
-    void turnFlashOn() throws IOException;
 
-    void turnFlashOff();
+    private static final String TAG = "Api23Flashlight";
+    private CameraManager mCameraManager;
 
+    public Api23Flashlight(CameraManager cameraManager) {
+        if (BuildConfig.DEBUG) Log.d(TAG, "constructor");
+        mCameraManager = cameraManager;
+    }
+
+    @Override
+    public void turnFlashOn() throws IOException {
+        if (BuildConfig.DEBUG) Log.d(TAG, "turnFlashOn");
+        try {
+            mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], true);
+        } catch (CameraAccessException e) {
+            throw new IOException(e);
+        }
+
+    }
+
+    @Override
+    public void turnFlashOff() {
+        if (BuildConfig.DEBUG) Log.d(TAG, "turnFlashOff");
+        try {
+            mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], false);
+        } catch (CameraAccessException e) {
+        }
+    }
 }

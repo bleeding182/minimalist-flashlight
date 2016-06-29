@@ -32,10 +32,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.SurfaceTexture;
-import android.graphics.drawable.Drawable;
-import android.hardware.Camera;
-import android.hardware.camera2.CameraManager;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
@@ -44,7 +40,8 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
-import java.util.List;
+import at.bleeding182.flashlight.api.Factory;
+import at.bleeding182.flashlight.api.Flashlight;
 
 /**
  * Service to access the camera flash and keep the flash running.

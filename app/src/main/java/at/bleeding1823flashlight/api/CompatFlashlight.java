@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package at.bleeding182.flashlight;
+package at.bleeding182.flashlight.api;
 
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -30,6 +30,8 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.List;
+
+import at.bleeding182.flashlight.BuildConfig;
 
 /**
  * @author David Medenjak on 5/22/2016.

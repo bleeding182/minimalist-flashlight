@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
-package at.bleeding182.flashlight;
+package at.bleeding182.flashlight.api;
 
-import android.content.Context;
-import android.hardware.Camera;
+import java.io.IOException;
 
 /**
  * @author David Medenjak on 5/22/2016.
  */
-public class Factory {
+public interface Flashlight {
 
-    public static Flashlight getFlashlight(Context context) {
-        return new CompatFlashlight(Camera.open());
-    }
+    void turnFlashOn() throws IOException;
+
+    void turnFlashOff();
+
 }
