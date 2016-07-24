@@ -81,7 +81,11 @@ public class FlashlightService extends Service {
         mBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
         mDrawable = new IconDrawable(size);
-        mFlashlight = Factory.getFlashlight(this);
+        try {
+            mFlashlight = Factory.getFlashlight(this);
+        } catch (RuntimeException e) {
+            Toast.makeText(this, R.string.err_available, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -90,6 +94,10 @@ public class FlashlightService extends Service {
             Log.v("FlashlightService", "onStartCommand " + (intent != null ? intent.getAction() : "none"));
         }
         if (intent != null) {
+            if(mFlashlight == null) {
+                stopSelf();
+                return START_NOT_STICKY;
+            }
             final String action = intent.getAction();
             if (FLASH_ON.equals(action)) {
                 try {
@@ -118,7 +126,6 @@ public class FlashlightService extends Service {
      * @param pendingIntent the intent to execute on click
      * @return the initialized view.
      */
-
     RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "getRemoteViews");
@@ -173,7 +180,6 @@ public class FlashlightService extends Service {
                 new ComponentName(context, FlashlightProvider.class), views);
     }
 
-    @SuppressWarnings("deprecation")
     private void startCamera() throws IOException {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "startCamera");
@@ -190,6 +196,4 @@ public class FlashlightService extends Service {
             mWakeLock.acquire();
         }
     }
-
-
 }

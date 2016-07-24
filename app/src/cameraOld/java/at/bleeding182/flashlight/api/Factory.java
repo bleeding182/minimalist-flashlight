@@ -30,6 +30,7 @@ import android.hardware.Camera;
 /**
  * @author David Medenjak on 5/22/2016.
  */
+@SuppressWarnings("deprecation")
 public class Factory {
 
     public static Flashlight getFlashlight(Context context) {

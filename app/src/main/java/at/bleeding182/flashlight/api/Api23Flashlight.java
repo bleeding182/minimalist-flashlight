@@ -37,7 +37,7 @@ import at.bleeding182.flashlight.BuildConfig;
 /**
  * @author David Medenjak on 5/22/2016.
  */
-@TargetApi(Build.VERSION_CODES.M)
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class Api23Flashlight implements Flashlight {
 
 
