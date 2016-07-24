@@ -24,12 +24,12 @@
 
 apply plugin: 'com.android.application'
 
-def version = 1
-def versionCodeBase = 17 + version * 3
+def version = 4
+def versionCodeBase = 17 + version * 2
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
 
     signingConfigs {
         release {
@@ -42,13 +42,16 @@ android {
 
     defaultConfig {
         applicationId "at.bleeding182.flashlight"
-        targetSdkVersion 21
+        targetSdkVersion 23
         versionName "3.0"
+    }
+    
+    aaptOptions {
+        cruncherEnabled = false
     }
     buildTypes {
         debug {
             minifyEnabled true
-            debuggable true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
@@ -60,17 +63,13 @@ android {
     }
 
     productFlavors {
-        png {
+        cameraOld {
             minSdkVersion 12
             versionCode versionCodeBase
         }
-        webp {
-            minSdkVersion 19
-            versionCode versionCodeBase + 1
-        }
-        svg {
+        marshmallow {
             minSdkVersion 21
-            versionCode versionCodeBase + 2
+            versionCode versionCodeBase + 1
         }
     }
     applicationVariants.all { variant ->
@@ -84,6 +83,5 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
 }
