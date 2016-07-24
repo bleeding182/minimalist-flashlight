@@ -24,7 +24,7 @@
 
 apply plugin: 'com.android.application'
 
-def version = 5
+def version = 6
 def versionCodeBase = 17 + version * 2
 
 android {
@@ -68,7 +68,7 @@ android {
             versionCode versionCodeBase
         }
         marshmallow {
-            minSdkVersion 21
+            minSdkVersion 23
             versionCode versionCodeBase + 1
         }
     }
