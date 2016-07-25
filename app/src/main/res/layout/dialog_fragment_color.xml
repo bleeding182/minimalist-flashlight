@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minWidth="260dp"
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:paddingTop="16dp">
+
+    <View
+        android:id="@+id/preview"
+        android:layout_width="@dimen/dialog_preview_size"
+        android:layout_height="@dimen/dialog_preview_size"
+        android:layout_gravity="center_horizontal"
+        android:background="#000000" />
+
+    <TextView
+        android:id="@+id/hexvalue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:textColor="?android:textColorSecondary"
+        tools:text="#55ff33" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/padding"
+        android:paddingRight="@dimen/padding">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:text="R" />
+
+        <SeekBar
+            android:id="@+id/slider_r"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:max="255"
+            android:maxHeight="48dp"
+            android:minHeight="48dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/padding"
+        android:paddingRight="@dimen/padding">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:text="G" />
+
+        <SeekBar
+            android:id="@+id/slider_g"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:max="255"
+            android:maxHeight="48dp"
+            android:minHeight="48dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/padding"
+        android:paddingRight="@dimen/padding">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:text="B" />
+
+        <SeekBar
+            android:id="@+id/slider_b"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:max="255"
+            android:maxHeight="48dp"
+            android:minHeight="48dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:paddingLeft="@dimen/padding"
+        android:paddingRight="@dimen/padding">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:id="@+id/action_cancel"
+            android:layout_marginRight="8dp"
+            android:background="?android:selectableItemBackground"
+            android:text="@android:string/cancel" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/action_ok"
+            android:background="?android:selectableItemBackground"
+            android:text="@android:string/ok" />
+    </LinearLayout>
+</LinearLayout>

@@ -34,6 +34,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -42,6 +43,10 @@ import java.io.IOException;
 
 import at.bleeding182.flashlight.api.Factory;
 import at.bleeding182.flashlight.api.Flashlight;
+import at.bleeding182.flashlight.wizard.ColorPreferences;
+import at.bleeding182.flashlight.wizard.WizardActivity;
+
+import static at.bleeding182.flashlight.wizard.WizardActivity.NAME;
 
 /**
  * Service to access the camera flash and keep the flash running.
@@ -57,7 +62,9 @@ public class FlashlightService extends Service {
 
     private Bitmap mBitmap;
     private Canvas mCanvas;
-    private IconDrawable mDrawable;
+    private FlashlightDrawable mDrawable;
+
+    private ColorPreferences preferences;
 
     /**
      * Wakelock to keep flashlight running with screen off.
@@ -80,7 +87,11 @@ public class FlashlightService extends Service {
         int size = getResources().getDimensionPixelSize(R.dimen.size);
         mBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
-        mDrawable = new IconDrawable(size);
+        mDrawable = new FlashlightDrawable();
+        mDrawable.setBounds(0, 0, size, size);
+
+        preferences = new ColorPreferences(PreferenceManager.getDefaultSharedPreferences(this));
+        mDrawable.setColors(preferences.getColor(NAME[0]), preferences.getColor(NAME[1]), preferences.getColor(NAME[2]), preferences.getColor(NAME[3]));
         try {
             mFlashlight = Factory.getFlashlight(this);
         } catch (RuntimeException e) {
@@ -94,7 +105,7 @@ public class FlashlightService extends Service {
             Log.v("FlashlightService", "onStartCommand " + (intent != null ? intent.getAction() : "none"));
         }
         if (intent != null) {
-            if(mFlashlight == null) {
+            if (mFlashlight == null) {
                 stopSelf();
                 return START_NOT_STICKY;
             }
@@ -126,7 +137,7 @@ public class FlashlightService extends Service {
      * @param pendingIntent the intent to execute on click
      * @return the initialized view.
      */
-    RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
+    private RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "getRemoteViews");
         }
@@ -164,7 +175,7 @@ public class FlashlightService extends Service {
         stopSelf();
     }
 
-    public void updateWidgets(Context context, boolean flashOn) {
+    private void updateWidgets(Context context, boolean flashOn) {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "updateWidgets");
         }

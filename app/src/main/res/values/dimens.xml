@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="size">64dp</dimen>
+    <dimen name="padding">16dp</dimen>
+    <dimen name="dialog_preview_size">48dp</dimen>
+    <dimen name="color_preview_size">24dp</dimen>
 </resources>

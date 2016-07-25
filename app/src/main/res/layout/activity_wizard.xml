@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingTop="16dp">
+
+        <TextView
+            style="@style/Subhead"
+            android:text="Icon Style" />
+
+        <RadioGroup
+            android:id="@+id/icon_style"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:paddingLeft="@dimen/padding"
+            android:paddingRight="@dimen/padding">
+
+            <RadioButton
+                android:id="@+id/icon_old"
+                android:layout_width="match_parent"
+                android:layout_height="?android:listPreferredItemHeight"
+                android:text="I / O" />
+
+            <RadioButton
+                android:id="@+id/icon_flashlight"
+                android:layout_width="match_parent"
+                android:layout_height="?android:listPreferredItemHeight"
+                android:text="Flashlight" />
+
+        </RadioGroup>
+
+        <TextView
+            style="@style/Subhead"
+            android:text="Turned Off" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <at.bleeding182.flashlight.wizard.PreviewImageView
+                android:id="@+id/preview_off"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"
+                android:layout_marginLeft="@dimen/padding"
+                android:layout_marginRight="16dp"
+                android:layout_marginStart="@dimen/padding" />
+
+
+            <TextView
+                android:id="@+id/background_disabled"
+                style="@style/Setting"
+                android:layout_toEndOf="@+id/preview_off"
+                android:layout_toRightOf="@+id/preview_off"
+                android:text="Background" />
+
+
+            <TextView
+                android:id="@+id/color_disabled"
+                style="@style/Setting"
+                android:layout_below="@+id/background_disabled"
+                android:layout_toEndOf="@+id/preview_off"
+                android:layout_toRightOf="@+id/preview_off"
+                android:text="Color" />
+
+        </RelativeLayout>
+
+        <TextView
+            style="@style/Subhead"
+            android:layout_marginTop="16dp"
+            android:text="Turned On" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <at.bleeding182.flashlight.wizard.PreviewImageView
+                android:id="@+id/preview_on"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"
+                android:layout_marginLeft="@dimen/padding"
+                android:layout_marginRight="16dp"
+                android:layout_marginStart="@dimen/padding" />
+
+            <TextView
+                android:id="@+id/background_enabled"
+                style="@style/Setting"
+                android:layout_toEndOf="@+id/preview_on"
+                android:layout_toRightOf="@+id/preview_on"
+                android:text="Background" />
+
+            <TextView
+                android:id="@+id/color_enabled"
+                style="@style/Setting"
+                android:layout_below="@+id/background_enabled"
+                android:layout_toEndOf="@+id/preview_on"
+                android:layout_toRightOf="@+id/preview_on"
+                android:text="Color" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/action_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="@dimen/padding"
+            android:layout_marginRight="@dimen/padding"
+            android:layout_marginTop="8dp"
+            android:text="@string/action_apply" />
+
+    </LinearLayout>
+</ScrollView>

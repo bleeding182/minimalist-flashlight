@@ -26,5 +26,7 @@
 
     <string name="app_name">Flashlight</string>
     <string name="err_available">Flash not available</string>
+    <string name="activity_customize">Customize Appearance</string>
+    <string name="action_apply">Apply</string>
 
 </resources>
