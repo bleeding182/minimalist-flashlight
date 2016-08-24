@@ -18,7 +18,7 @@ public class PreviewImageView extends ImageView {
     }
 
     private void init() {
-        IconDrawable drawable = new IconDrawable(200);
+        OldIconDrawable drawable = new OldIconDrawable();
         setImageDrawable(drawable);
     }
 
@@ -36,7 +36,7 @@ public class PreviewImageView extends ImageView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        IconDrawable drawable = new IconDrawable(200);
+        OldIconDrawable drawable = new OldIconDrawable();
         setImageDrawable(drawable);
         drawable.setFlashOn(getLayoutParams().height == ViewGroup.LayoutParams.MATCH_PARENT);
     }
