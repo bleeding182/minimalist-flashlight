@@ -18,7 +18,7 @@ This project uses a *BroadcastReceiver* / *AppWidgetProvider* and a service to p
 
 ## Extras
 
-At [Flashlight Widget][[play] you can get the app for free on Android.
+At [Flashlight Widget][play] you can get the app for free on Android.
 
 [![Flattr this git repo][icon]][link]
 
