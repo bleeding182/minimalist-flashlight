@@ -57,7 +57,7 @@ public class FlashlightService extends Service {
 
     private Bitmap mBitmap;
     private Canvas mCanvas;
-    private IconDrawable mDrawable;
+    private OldIconDrawable mDrawable;
 
     /**
      * Wakelock to keep flashlight running with screen off.
@@ -80,7 +80,10 @@ public class FlashlightService extends Service {
         int size = getResources().getDimensionPixelSize(R.dimen.size);
         mBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
-        mDrawable = new IconDrawable(size);
+        mDrawable = new OldIconDrawable();
+
+        mDrawable.setBounds(0, 0, size, size);
+
         try {
             mFlashlight = Factory.getFlashlight(this);
         } catch (RuntimeException e) {
@@ -94,7 +97,7 @@ public class FlashlightService extends Service {
             Log.v("FlashlightService", "onStartCommand " + (intent != null ? intent.getAction() : "none"));
         }
         if (intent != null) {
-            if(mFlashlight == null) {
+            if (mFlashlight == null) {
                 stopSelf();
                 return START_NOT_STICKY;
             }
@@ -126,11 +129,12 @@ public class FlashlightService extends Service {
      * @param pendingIntent the intent to execute on click
      * @return the initialized view.
      */
-    RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
+    private RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
         if (BuildConfig.DEBUG) {
             Log.v("FlashlightService", "getRemoteViews");
         }
         final RemoteViews remoteViews = new RemoteViews(packageName, R.layout.widget_layout);
+
         mDrawable.setFlashOn(flashState);
         mDrawable.draw(mCanvas);
         remoteViews.setImageViewBitmap(R.id.update, mBitmap);

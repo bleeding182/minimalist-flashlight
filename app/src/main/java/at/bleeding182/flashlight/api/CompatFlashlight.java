@@ -77,14 +77,14 @@ public class CompatFlashlight implements Flashlight {
         }
         final List<String> flashes = p.getSupportedFlashModes();
         if (flashes == null) {
-            throw new IllegalStateException("No flash available");
+            throw new IllegalStateException();
         }
         if (flashes.contains(Camera.Parameters.FLASH_MODE_TORCH)) {
             p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         } else if (flashes.contains(Camera.Parameters.FLASH_MODE_ON)) {
             p.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
         } else {
-            throw new IllegalStateException("No useable flash mode");
+            throw new IllegalStateException();
         }
     }
 }
