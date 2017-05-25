@@ -39,52 +39,52 @@ import at.bleeding182.flashlight.BuildConfig;
 @SuppressWarnings("deprecation")
 public class CompatFlashlight implements Flashlight {
 
-    /**
-     * Camera instance to access the flash.
-     */
-    private Camera mCamera;
+  /**
+   * Camera instance to access the flash.
+   */
+  private Camera mCamera;
 
-    public CompatFlashlight(Camera camera) {
-        mCamera = camera;
+  public CompatFlashlight(Camera camera) {
+    mCamera = camera;
+  }
+
+  @Override
+  public void turnFlashOn() throws IOException {
+    final Camera.Parameters parameters = mCamera.getParameters();
+    configFlashParameters(parameters);
+
+    // will work on some devices
+    mCamera.setParameters(parameters);
+    // Needed for some devices.
+    mCamera.setPreviewTexture(new SurfaceTexture(0));
+    // Needed for some more devices.
+    mCamera.startPreview();
+  }
+
+  @Override
+  public void turnFlashOff() {
+    if (mCamera != null) {
+      mCamera.stopPreview();
+      mCamera.release();
     }
+    mCamera = null;
+  }
 
-    @Override
-    public void turnFlashOn() throws IOException {
-        final Camera.Parameters parameters = mCamera.getParameters();
-        configFlashParameters(parameters);
 
-        // will work on some devices
-        mCamera.setParameters(parameters);
-        // Needed for some devices.
-        mCamera.setPreviewTexture(new SurfaceTexture(0));
-        // Needed for some more devices.
-        mCamera.startPreview();
+  private void configFlashParameters(Camera.Parameters p) {
+    if (BuildConfig.DEBUG) {
+      Log.v("FlashlightService", "configFlashParameters");
     }
-
-    @Override
-    public void turnFlashOff() {
-        if (mCamera != null) {
-            mCamera.stopPreview();
-            mCamera.release();
-        }
-        mCamera = null;
+    final List<String> flashes = p.getSupportedFlashModes();
+    if (flashes == null) {
+      throw new IllegalStateException();
     }
-
-
-    private void configFlashParameters(Camera.Parameters p) {
-        if (BuildConfig.DEBUG) {
-            Log.v("FlashlightService", "configFlashParameters");
-        }
-        final List<String> flashes = p.getSupportedFlashModes();
-        if (flashes == null) {
-            throw new IllegalStateException();
-        }
-        if (flashes.contains(Camera.Parameters.FLASH_MODE_TORCH)) {
-            p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-        } else if (flashes.contains(Camera.Parameters.FLASH_MODE_ON)) {
-            p.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
-        } else {
-            throw new IllegalStateException();
-        }
+    if (flashes.contains(Camera.Parameters.FLASH_MODE_TORCH)) {
+      p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+    } else if (flashes.contains(Camera.Parameters.FLASH_MODE_ON)) {
+      p.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
+    } else {
+      throw new IllegalStateException();
     }
+  }
 }

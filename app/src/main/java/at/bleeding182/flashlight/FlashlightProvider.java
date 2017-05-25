@@ -38,35 +38,35 @@ import android.util.Log;
  */
 public class FlashlightProvider extends BroadcastReceiver {
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (BuildConfig.DEBUG) {
-            Log.v("FlashlightProvider", "Action: " + intent.getAction());
-        }
-        final String action = intent.getAction();
+  /**
+   * What to do when the last instance of the widget is removed. It stops the
+   * service and sets the status in the preferences to off.
+   *
+   * @param context the application context.
+   */
+  public static void onDisabled(Context context) {
+    if (BuildConfig.DEBUG) {
+      Log.d("FlashlightProvider", "onDisabled");
+    }
+    context.stopService(new Intent(context, FlashlightService.class));
+  }
 
-        switch (action) {
-            case AppWidgetManager.ACTION_APPWIDGET_UPDATE:
-                context.startService(new Intent(context, FlashlightService.class));
-                break;
-            case AppWidgetManager.ACTION_APPWIDGET_DISABLED:
-                onDisabled(context);
-                break;
-        }
+  @Override
+  public void onReceive(Context context, Intent intent) {
+    if (BuildConfig.DEBUG) {
+      Log.v("FlashlightProvider", "Action: " + intent.getAction());
+    }
+    final String action = intent.getAction();
 
-        // Ignore enabled, deleted, options_changed
+    switch (action) {
+      case AppWidgetManager.ACTION_APPWIDGET_UPDATE:
+        context.startService(new Intent(context, FlashlightService.class));
+        break;
+      case AppWidgetManager.ACTION_APPWIDGET_DISABLED:
+        onDisabled(context);
+        break;
     }
 
-    /**
-     * What to do when the last instance of the widget is removed. It stops the
-     * service and sets the status in the preferences to off.
-     *
-     * @param context the application context.
-     */
-    public static void onDisabled(Context context) {
-        if (BuildConfig.DEBUG) {
-            Log.d("FlashlightProvider", "onDisabled");
-        }
-        context.stopService(new Intent(context, FlashlightService.class));
-    }
+    // Ignore enabled, deleted, options_changed
+  }
 }

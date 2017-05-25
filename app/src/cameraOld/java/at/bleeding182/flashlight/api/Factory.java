@@ -33,7 +33,7 @@ import android.hardware.Camera;
 @SuppressWarnings("deprecation")
 public class Factory {
 
-    public static Flashlight getFlashlight(Context context) {
-        return new CompatFlashlight(Camera.open());
-    }
+  public static Flashlight getFlashlight(Context context) {
+    return new CompatFlashlight(Camera.open());
+  }
 }

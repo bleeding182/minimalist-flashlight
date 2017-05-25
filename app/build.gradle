@@ -24,7 +24,7 @@
 
 apply plugin: 'com.android.application'
 
-def version = 9
+def version = 10
 def versionCodeBase = 17 + version * 2
 
 android {

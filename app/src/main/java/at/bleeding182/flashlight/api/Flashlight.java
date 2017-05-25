@@ -31,8 +31,8 @@ import java.io.IOException;
  */
 public interface Flashlight {
 
-    void turnFlashOn() throws IOException;
+  void turnFlashOn() throws IOException;
 
-    void turnFlashOff();
+  void turnFlashOff();
 
 }

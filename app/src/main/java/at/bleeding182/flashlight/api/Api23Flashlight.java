@@ -41,31 +41,31 @@ import at.bleeding182.flashlight.BuildConfig;
 public class Api23Flashlight implements Flashlight {
 
 
-    private static final String TAG = "Api23Flashlight";
-    private CameraManager mCameraManager;
+  private static final String TAG = "Api23Flashlight";
+  private CameraManager mCameraManager;
 
-    public Api23Flashlight(CameraManager cameraManager) {
-        if (BuildConfig.DEBUG) Log.d(TAG, "constructor");
-        mCameraManager = cameraManager;
+  public Api23Flashlight(CameraManager cameraManager) {
+    if (BuildConfig.DEBUG) Log.d(TAG, "constructor");
+    mCameraManager = cameraManager;
+  }
+
+  @Override
+  public void turnFlashOn() throws IOException {
+    if (BuildConfig.DEBUG) Log.d(TAG, "turnFlashOn");
+    try {
+      mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], true);
+    } catch (CameraAccessException e) {
+      throw new IOException(e);
     }
 
-    @Override
-    public void turnFlashOn() throws IOException {
-        if (BuildConfig.DEBUG) Log.d(TAG, "turnFlashOn");
-        try {
-            mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], true);
-        } catch (CameraAccessException e) {
-            throw new IOException(e);
-        }
+  }
 
+  @Override
+  public void turnFlashOff() {
+    if (BuildConfig.DEBUG) Log.d(TAG, "turnFlashOff");
+    try {
+      mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], false);
+    } catch (CameraAccessException | IllegalArgumentException e) {
     }
-
-    @Override
-    public void turnFlashOff() {
-        if (BuildConfig.DEBUG) Log.d(TAG, "turnFlashOff");
-        try {
-            mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], false);
-        } catch (CameraAccessException e) {
-        }
-    }
+  }
 }
