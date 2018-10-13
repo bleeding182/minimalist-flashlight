@@ -27,12 +27,9 @@ package at.bleeding182.flashlight.api;
 import android.content.Context;
 import android.hardware.camera2.CameraManager;
 
-/**
- * @author David Medenjak on 5/22/2016.
- */
 public class Factory {
 
-    public static Flashlight getFlashlight(Context context) {
-        return new Api23Flashlight((CameraManager) context.getSystemService(Context.CAMERA_SERVICE));
-    }
+  public static Flashlight getFlashlight(Context context) {
+    return new Api23Flashlight((CameraManager) context.getSystemService(Context.CAMERA_SERVICE));
+  }
 }

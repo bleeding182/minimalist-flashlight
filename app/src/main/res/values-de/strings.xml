@@ -26,5 +26,8 @@
 
     <string name="app_name">Taschenlampe</string>
     <string name="err_available">Licht nicht verfügbar</string>
+    <string name="notification_action_turn_off">Ausschalten</string>
+    <string name="info_description">Diese App enthält ein Widget und muss manuell auf deinen Startbildschirm hinzugefügt werden. Meistens kannst du die Widgetliste durch langes drücken am Startbildschirm öffnen und das gewünschte Widget dann an die richtige Stelle ziehen.</string>
+    <string name="info_title">Installation</string>
 
 </resources>

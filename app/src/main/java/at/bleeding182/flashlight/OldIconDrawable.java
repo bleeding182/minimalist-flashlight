@@ -6,6 +6,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PixelFormat;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -13,7 +14,7 @@ import android.graphics.drawable.Drawable;
 
 public class OldIconDrawable extends Drawable {
 
-  Paint mPaint = new Paint();
+  private Paint mPaint = new Paint();
   private float mRadius;
   private float mShadowRadius;
   private RadialGradient mLightShadow;
@@ -111,7 +112,7 @@ public class OldIconDrawable extends Drawable {
 
   @Override
   public int getOpacity() {
-    return 0;
+    return PixelFormat.TRANSLUCENT;
   }
 
   public void setFlashOn(boolean flashOn) {

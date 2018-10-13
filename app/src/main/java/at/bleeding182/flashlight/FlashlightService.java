@@ -30,8 +30,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
@@ -39,32 +38,43 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import at.bleeding182.flashlight.api.Factory;
 import at.bleeding182.flashlight.api.Flashlight;
 
-/**
- * Service to access the camera flash and keep the flash running.
- *
- * @author David Medenjak 2014
- */
+/** Service to access the camera flash and keep the flash running. */
 public class FlashlightService extends Service {
-  /**
-   * Action to toggle flash on/off.
-   */
-  public static final String FLASH_ON = BuildConfig.APPLICATION_ID + ".FLASH_ON";
-  public static final String FLASH_OFF = BuildConfig.APPLICATION_ID + ".FLASH_OFF";
 
-  private Bitmap mBitmap;
-  private Canvas mCanvas;
-  private OldIconDrawable mDrawable;
+  private static final long TIMEOUT = TimeUnit.HOURS.toMillis(1);
 
-  /**
-   * Wakelock to keep flashlight running with screen off.
-   */
-  private PowerManager.WakeLock mWakeLock;
+  private static final String TAG = "FlashlightService";
+  private static final String LOCK_TAG = BuildConfig.APPLICATION_ID + ":wakelog";
 
-  private Flashlight mFlashlight;
+  static boolean isRunning = false;
+
+  private WidgetUtil widgetUtil;
+
+  /** Wakelock to keep flashlight running with screen off. */
+  private PowerManager.WakeLock wakeLock;
+
+  private Flashlight flashlight;
+
+  public static void updateWidgets(Context context, WidgetUtil widgetUtil, boolean flashOn) {
+    Log.v(TAG, "updateWidgets");
+
+    final Intent intent = new Intent(context, FlashlightProvider.class);
+    String action = flashOn ? FlashlightProvider.FLASH_OFF : FlashlightProvider.FLASH_ON;
+    intent.setAction(action);
+    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+
+    final PendingIntent pendingIntent =
+        PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    final RemoteViews views = widgetUtil.getRemoteViews(flashOn, pendingIntent);
+
+    AppWidgetManager.getInstance(context)
+        .updateAppWidget(new ComponentName(context, FlashlightProvider.class), views);
+  }
 
   @Override
   public IBinder onBind(Intent intent) {
@@ -74,18 +84,22 @@ public class FlashlightService extends Service {
   @Override
   public void onCreate() {
     super.onCreate();
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightService", "onCreate");
-    }
-    int size = getResources().getDimensionPixelSize(R.dimen.size);
-    mBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-    mCanvas = new Canvas(mBitmap);
-    mDrawable = new OldIconDrawable();
+    Log.v(TAG, "onCreate");
 
-    mDrawable.setBounds(0, 0, size, size);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      startForeground(1, NotificationUtil.flashlightNotification(this));
+    }
+
+    widgetUtil = new WidgetUtil(this);
+    PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+    if (powerManager == null) throw new IllegalStateException();
+
+    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOCK_TAG);
+    wakeLock.setReferenceCounted(false);
+    wakeLock.acquire(TIMEOUT);
 
     try {
-      mFlashlight = Factory.getFlashlight(this);
+      flashlight = Factory.getFlashlight(this);
     } catch (RuntimeException e) {
       Toast.makeText(this, R.string.err_available, Toast.LENGTH_SHORT).show();
     }
@@ -93,116 +107,49 @@ public class FlashlightService extends Service {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightService", "onStartCommand " + (intent != null ? intent.getAction() : "none"));
+    Log.v(TAG, "onStartCommand " + (intent != null ? intent.getAction() : "none"));
+
+    isRunning = true;
+
+    try {
+      startCamera();
+      updateWidgets(this, widgetUtil, true);
+      return START_STICKY;
+    } catch (Exception ex) {
+      Toast.makeText(this, R.string.err_available, Toast.LENGTH_SHORT).show();
+      Log.v(TAG, "exception " + ex.getMessage());
     }
-    if (intent != null) {
-      if (mFlashlight == null) {
-        stopSelf();
-        return START_NOT_STICKY;
-      }
-      final String action = intent.getAction();
-      if (FLASH_ON.equals(action)) {
-        try {
-          startCamera();
-          updateWidgets(this, true);
-          return START_STICKY;
-        } catch (Exception ex) {
-          Toast.makeText(this, R.string.err_available, Toast.LENGTH_SHORT).show();
-          if (BuildConfig.DEBUG) {
-            Log.v("FlashlightService", "exception " + ex.getMessage());
-          }
-        }
-      }
-    }
-    updateWidgets(this, false);
+
+    updateWidgets(this, widgetUtil, false);
     stopSelf();
     return START_NOT_STICKY;
   }
 
-
-  /**
-   * Sets up the Widget Layout.
-   *
-   * @param packageName   the name of the application package.
-   * @param flashState    the state of the flash.
-   * @param pendingIntent the intent to execute on click
-   * @return the initialized view.
-   */
-  private RemoteViews getRemoteViews(String packageName, boolean flashState, PendingIntent pendingIntent) {
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightService", "getRemoteViews");
-    }
-    final RemoteViews remoteViews = new RemoteViews(packageName, R.layout.widget_layout);
-
-    mDrawable.setFlashOn(flashState);
-    mDrawable.draw(mCanvas);
-    remoteViews.setImageViewBitmap(R.id.update, mBitmap);
-    remoteViews.setOnClickPendingIntent(R.id.update, pendingIntent);
-    return remoteViews;
-  }
-
   @Override
   public void onDestroy() {
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightService", "onDestroy");
-    }
+    super.onDestroy();
+
+    Log.v(TAG, "onDestroy");
+    isRunning = false;
     stopCamera();
 
-    updateWidgets(this, false);
+    updateWidgets(this, widgetUtil, false);
 
-    final PowerManager.WakeLock wakeLock = mWakeLock;
-    mWakeLock = null;
-    if (wakeLock != null && wakeLock.isHeld()) {
-      wakeLock.release();
-    }
-
-    super.onDestroy();
+    wakeLock.release();
   }
 
-  /**
-   * Stops the camera and sets the instance to null.
-   */
+  /** Stops the camera and sets the instance to null. */
   private void stopCamera() {
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightService", "stopCamera");
-    }
-    if (mFlashlight != null) {
-      mFlashlight.turnFlashOff();
+    Log.v(TAG, "stopCamera");
+
+    if (flashlight != null) {
+      flashlight.turnFlashOff();
     }
     stopSelf();
   }
 
-  public void updateWidgets(Context context, boolean flashOn) {
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightService", "updateWidgets");
-    }
-    final Intent intent = new Intent(context, FlashlightService.class);
-    intent.setAction(flashOn ? FLASH_OFF : FLASH_ON);
-    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
-
-    final PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent,
-        PendingIntent.FLAG_UPDATE_CURRENT);
-    final RemoteViews views = getRemoteViews(context.getPackageName(), flashOn, pendingIntent);
-
-    AppWidgetManager.getInstance(context).updateAppWidget(
-        new ComponentName(context, FlashlightProvider.class), views);
-  }
-
   private void startCamera() throws IOException {
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightService", "startCamera");
-    }
-
-    mFlashlight.turnFlashOn();
-
-    // Keep phone awake with the screen off
-    if (mWakeLock == null) {
-      mWakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
-          .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, BuildConfig.APPLICATION_ID);
-    }
-    if (!mWakeLock.isHeld()) {
-      mWakeLock.acquire();
-    }
+    Log.v(TAG, "startCamera");
+    flashlight.turnFlashOn();
   }
 }

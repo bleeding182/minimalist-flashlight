@@ -31,17 +31,10 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.List;
 
-import at.bleeding182.flashlight.BuildConfig;
-
-/**
- * @author David Medenjak on 5/22/2016.
- */
 @SuppressWarnings("deprecation")
 public class CompatFlashlight implements Flashlight {
 
-  /**
-   * Camera instance to access the flash.
-   */
+  /** Camera instance to access the flash. */
   private Camera mCamera;
 
   public CompatFlashlight(Camera camera) {
@@ -70,11 +63,8 @@ public class CompatFlashlight implements Flashlight {
     mCamera = null;
   }
 
-
   private void configFlashParameters(Camera.Parameters p) {
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightService", "configFlashParameters");
-    }
+    Log.v("FlashlightService", "configFlashParameters");
     final List<String> flashes = p.getSupportedFlashModes();
     if (flashes == null) {
       throw new IllegalStateException();

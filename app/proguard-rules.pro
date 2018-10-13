@@ -4,6 +4,7 @@
 -repackageclasses ''
 -allowaccessmodification
 -mergeinterfacesaggressively
+-overloadaggressively
 
 -assumenosideeffects class android.util.Log {
     public static *** d(...);

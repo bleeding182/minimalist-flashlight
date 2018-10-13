@@ -26,13 +26,9 @@ package at.bleeding182.flashlight.api;
 
 import java.io.IOException;
 
-/**
- * @author David Medenjak on 5/22/2016.
- */
 public interface Flashlight {
 
   void turnFlashOn() throws IOException;
 
   void turnFlashOff();
-
 }

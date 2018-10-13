@@ -25,6 +25,9 @@
 <resources>
 
     <string name="app_name">Flashlight</string>
+    <string name="notification_action_turn_off">Turn Off</string>
     <string name="err_available">Flash not available</string>
+    <string name="info_description">This app comes as a widget and needs to be added to your home screen manually.\n\nMost of the time you can find the widgets by long pressing your home screen and then dragging the widget you\'d like to add.</string>
+    <string name="info_title">Installation</string>
 
 </resources>

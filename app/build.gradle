@@ -24,12 +24,12 @@
 
 apply plugin: 'com.android.application'
 
-def version = 10
+def version = 11
 def versionCodeBase = 17 + version * 2
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
 
     signingConfigs {
         release {
@@ -42,8 +42,10 @@ android {
 
     defaultConfig {
         applicationId "at.bleeding182.flashlight"
-        targetSdkVersion 25
-        versionName "3.0.1"
+        targetSdkVersion 28
+        versionName "4.0.0"
+
+        resConfigs "de", "en"
     }
     
     aaptOptions {
@@ -76,7 +78,7 @@ android {
             versionCode versionCodeBase + 1
         }
     }
-    applicationVariants.all { variant ->
+    applicationVariants.each { variant ->
         variant.outputs.all {
             outputFileName = "${variant.name}-vc${variant.versionCode}-${variant.versionName}.apk"
         }

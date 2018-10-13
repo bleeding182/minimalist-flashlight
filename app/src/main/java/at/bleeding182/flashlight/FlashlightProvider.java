@@ -28,42 +28,55 @@ import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
-/**
- * Writing / reading SharedPreferences to toggle between on/off state and
- * updating the widgets.
- *
- * @author David Medenjak 2014
- */
+/** Writing / reading SharedPreferences to toggle between on/off state and updating the widgets. */
 public class FlashlightProvider extends BroadcastReceiver {
 
+  public static final String FLASH_ON = BuildConfig.APPLICATION_ID + ".FLASH_ON";
+  public static final String FLASH_OFF = BuildConfig.APPLICATION_ID + ".FLASH_OFF";
+
   /**
-   * What to do when the last instance of the widget is removed. It stops the
-   * service and sets the status in the preferences to off.
+   * What to do when the last instance of the widget is removed. It stops the service and sets the
+   * status in the preferences to off.
    *
    * @param context the application context.
    */
-  public static void onDisabled(Context context) {
-    if (BuildConfig.DEBUG) {
-      Log.d("FlashlightProvider", "onDisabled");
-    }
-    context.stopService(new Intent(context, FlashlightService.class));
+  public static void onDisabled(final Context context, final Intent intent) {
+    Log.d("FlashlightProvider", "onDisabled");
+    context.stopService(intent);
+    InstallReceiver.updateInstallerActivityState(context);
   }
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    if (BuildConfig.DEBUG) {
-      Log.v("FlashlightProvider", "Action: " + intent.getAction());
-    }
-    final String action = intent.getAction();
+    Log.v("FlashlightProvider", "Action: " + intent.getAction());
 
+    final String action = intent.getAction();
+    if (action == null) return;
+
+    final Intent serviceIntent = new Intent(context, FlashlightService.class);
     switch (action) {
+      case FLASH_ON:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          context.startForegroundService(serviceIntent);
+        } else {
+          context.startService(serviceIntent);
+        }
+        break;
+      case FLASH_OFF:
+        context.stopService(serviceIntent);
+        break;
       case AppWidgetManager.ACTION_APPWIDGET_UPDATE:
-        context.startService(new Intent(context, FlashlightService.class));
+        WidgetUtil util = new WidgetUtil(context);
+        FlashlightService.updateWidgets(context, util, FlashlightService.isRunning);
+        break;
+      case AppWidgetManager.ACTION_APPWIDGET_ENABLED:
+        InstallReceiver.updateInstallerActivityState(context);
         break;
       case AppWidgetManager.ACTION_APPWIDGET_DISABLED:
-        onDisabled(context);
+        onDisabled(context, serviceIntent);
         break;
     }
 
