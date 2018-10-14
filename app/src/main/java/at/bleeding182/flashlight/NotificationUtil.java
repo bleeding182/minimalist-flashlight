@@ -11,35 +11,57 @@ import android.os.Build;
 
 public final class NotificationUtil {
 
-  public static final String CHANNEL_DEFAULT = "default";
+  private static final String CHANNEL_DEFAULT = "default";
 
   private NotificationUtil() {
     // restrict initialization
   }
 
-  @TargetApi(Build.VERSION_CODES.O)
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
   public static Notification flashlightNotification(final Context context) {
-    final NotificationManager manager = context.getSystemService(NotificationManager.class);
+    final NotificationManager manager =
+        (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
     if (manager == null) {
       throw new IllegalStateException();
     }
 
-    createChannel(context, manager);
+    final Notification.Action action = createTurnOffAction(context);
 
-    Intent intent =
+    Notification.Builder builder =
+        new Notification.Builder(context)
+            .setSmallIcon(R.drawable.ic_flashlight)
+            .setContentTitle(context.getString(R.string.app_name))
+            .addAction(action);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      createChannel(context, manager);
+      builder.setChannelId(CHANNEL_DEFAULT);
+    }
+
+    return builder.build();
+  }
+
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  private static Notification.Action createTurnOffAction(Context context) {
+    final Intent intent =
         new Intent(context, FlashlightProvider.class).setAction(FlashlightProvider.FLASH_OFF);
-    PendingIntent offIntent =
+    final PendingIntent offIntent =
         PendingIntent.getBroadcast(context, 2141, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-    return new Notification.Builder(context)
-        .setChannelId(CHANNEL_DEFAULT)
-        .setSmallIcon(R.drawable.ic_flashlight)
-        .addAction(
-            new Notification.Action.Builder(
-                    null, context.getString(R.string.notification_action_turn_off), offIntent)
-                .build())
-        .build();
+    final Notification.Action action;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      action =
+          new Notification.Action.Builder(
+                  null, context.getString(R.string.notification_action_turn_off), offIntent)
+              .build();
+    } else {
+      action =
+          new Notification.Action.Builder(
+                  0, context.getString(R.string.notification_action_turn_off), offIntent)
+              .build();
+    }
+    return action;
   }
 
   @TargetApi(Build.VERSION_CODES.O)

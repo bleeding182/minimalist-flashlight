@@ -69,7 +69,7 @@ android {
     productFlavors {
         cameraOld {
             dimension "camera"
-            minSdkVersion 12
+            minSdkVersion 14
             versionCode versionCodeBase
         }
         marshmallow {

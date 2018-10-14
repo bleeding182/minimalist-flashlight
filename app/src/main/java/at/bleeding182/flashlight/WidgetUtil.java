@@ -4,7 +4,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.util.Log;
+import android.graphics.Color;
 import android.widget.RemoteViews;
 
 public final class WidgetUtil {
@@ -32,8 +32,6 @@ public final class WidgetUtil {
    * @return the initialized view.
    */
   public RemoteViews getRemoteViews(boolean flashState, PendingIntent pendingIntent) {
-    Log.v("FlashlightService", "getRemoteViews");
-
     final RemoteViews remoteViews = new RemoteViews(packageName, R.layout.widget_layout);
 
     remoteViews.setImageViewBitmap(R.id.update, getBitmap(flashState));
@@ -41,7 +39,8 @@ public final class WidgetUtil {
     return remoteViews;
   }
 
-  public Bitmap getBitmap(boolean flashState) {
+  private Bitmap getBitmap(boolean flashState) {
+    bitmap.eraseColor(Color.TRANSPARENT);
     drawable.setFlashOn(flashState);
     drawable.draw(canvas);
     return bitmap;

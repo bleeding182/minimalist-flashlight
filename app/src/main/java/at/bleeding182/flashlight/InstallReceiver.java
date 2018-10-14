@@ -11,6 +11,24 @@ import android.util.Log;
 public class InstallReceiver extends BroadcastReceiver {
 
   public static void updateInstallerActivityState(Context context) {
+    boolean hasWidgets = hasWidgets(context);
+
+    ComponentName installerActivity = new ComponentName(context, InstallerActivity.class);
+    int flags = PackageManager.DONT_KILL_APP;
+
+    final int state;
+    if (hasWidgets) {
+      Log.d("Flashlight", "disabling activity");
+      state = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+    } else {
+      Log.d("Flashlight", "enabling activity");
+      state = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+    }
+
+    context.getPackageManager().setComponentEnabledSetting(installerActivity, state, flags);
+  }
+
+  private static boolean hasWidgets(Context context) {
     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
     ComponentName myProvider = new ComponentName(context, FlashlightProvider.class);
 
@@ -21,20 +39,7 @@ public class InstallReceiver extends BroadcastReceiver {
     } else {
       widgetCount = widgetIds.length;
     }
-
-    ComponentName installerActivity = new ComponentName(context, InstallerActivity.class);
-    int flags = PackageManager.DONT_KILL_APP;
-
-    final int state;
-    if (widgetCount > 0) {
-      Log.d("Flashlight", "disabling activity");
-      state = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-    } else {
-      Log.d("Flashlight", "enabling activity");
-      state = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-    }
-
-    context.getPackageManager().setComponentEnabledSetting(installerActivity, state, flags);
+    return widgetCount > 0;
   }
 
   @Override

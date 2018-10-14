@@ -32,8 +32,6 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import at.bleeding182.flashlight.BuildConfig;
-
 @TargetApi(Build.VERSION_CODES.M)
 public class Api23Flashlight implements Flashlight {
 
@@ -48,19 +46,19 @@ public class Api23Flashlight implements Flashlight {
   @Override
   public void turnFlashOn() throws IOException {
     Log.d(TAG, "turnFlashOn");
-        try {
-          mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], true);
-        } catch (CameraAccessException e) {
-          throw new IOException(e);
-        }
+    try {
+      mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], true);
+    } catch (CameraAccessException e) {
+      throw new IOException(e);
+    }
   }
 
   @Override
   public void turnFlashOff() {
-    if (BuildConfig.DEBUG) Log.d(TAG, "turnFlashOff");
-        try {
-          mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], false);
-        } catch (CameraAccessException | IllegalArgumentException e) {
-        }
+    Log.d(TAG, "turnFlashOff");
+    try {
+      mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], false);
+    } catch (CameraAccessException | IllegalArgumentException e) {
+    }
   }
 }

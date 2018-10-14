@@ -86,7 +86,7 @@ public class FlashlightService extends Service {
     super.onCreate();
     Log.v(TAG, "onCreate");
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       startForeground(1, NotificationUtil.flashlightNotification(this));
     }
 

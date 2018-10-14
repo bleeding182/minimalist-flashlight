@@ -49,11 +49,11 @@ public class OldIconDrawable extends Drawable {
     float startRatio = mRadius / mShadowRadius;
     float midRatio = startRatio + ((1f - startRatio) / 2f);
 
-    mShadow = new RadialGradient(mSize / 2, mSize / 2, mShadowRadius,
+    mShadow = new RadialGradient(mSize / 2F, mSize / 2F, mShadowRadius,
         new int[]{0, 0x44000000, 0x14000000, 0},
         new float[]{0f, startRatio, midRatio, 1f},
         Shader.TileMode.CLAMP);
-    mLightShadow = new RadialGradient(mSize / 2, mSize / 2, mShadowRadius,
+    mLightShadow = new RadialGradient(mSize / 2F, mSize / 2F, mShadowRadius,
         new int[]{0, 0x6433b5e5, 0x1433b5e5, 0},
         new float[]{0f, startRatio, midRatio, 1f},
         Shader.TileMode.CLAMP);
@@ -79,10 +79,10 @@ public class OldIconDrawable extends Drawable {
   public void draw(Canvas canvas) {
     mPaint.setStyle(Paint.Style.FILL);
     mPaint.setShader(mFlashOn ? mLightShadow : mShadow);
-    canvas.drawCircle(mSize / 2, mSize / 2, mShadowRadius, mPaint);
+    canvas.drawCircle(mSize / 2F, mSize / 2F, mShadowRadius, mPaint);
     mPaint.setShader(null);
     mPaint.setColor(mFlashOn ? backgroundEnabled : backgroundDisabled);
-    canvas.drawCircle(mSize / 2, mSize / 2, mRadius, mPaint);
+    canvas.drawCircle(mSize / 2F, mSize / 2F, mRadius, mPaint);
 
     mPaint.setStyle(Paint.Style.STROKE);
     mPaint.setStrokeWidth(mRadius / 7f);
