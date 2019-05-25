@@ -17,13 +17,23 @@ public class InstallerActivity extends Activity {
     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
     ComponentName myProvider = new ComponentName(context, FlashlightProvider.class);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-        && appWidgetManager != null
-        && appWidgetManager.isRequestPinAppWidgetSupported()) {
-      appWidgetManager.requestPinAppWidget(myProvider, null, null);
+    if (tryAddingWidget(appWidgetManager, myProvider)) {
       finish();
     }
 
     setContentView(R.layout.activity_install_info);
+  }
+
+  private boolean tryAddingWidget(AppWidgetManager appWidgetManager, ComponentName myProvider) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        && appWidgetManager != null
+        && appWidgetManager.isRequestPinAppWidgetSupported()) {
+      try {
+        return appWidgetManager.requestPinAppWidget(myProvider, null, null);
+      } catch (IllegalStateException ex) {
+        return false;
+      }
+    }
+    return false;
   }
 }
