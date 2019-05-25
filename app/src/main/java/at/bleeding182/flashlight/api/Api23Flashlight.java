@@ -38,6 +38,8 @@ public class Api23Flashlight implements Flashlight {
   private static final String TAG = "Api23Flashlight";
   private CameraManager mCameraManager;
 
+  private boolean flashOn;
+
   public Api23Flashlight(CameraManager cameraManager) {
     Log.d(TAG, "constructor");
     mCameraManager = cameraManager;
@@ -48,6 +50,7 @@ public class Api23Flashlight implements Flashlight {
     Log.d(TAG, "turnFlashOn");
     try {
       mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], true);
+      flashOn = true;
     } catch (CameraAccessException e) {
       throw new IOException(e);
     }
@@ -56,8 +59,10 @@ public class Api23Flashlight implements Flashlight {
   @Override
   public void turnFlashOff() {
     Log.d(TAG, "turnFlashOff");
+    if (!flashOn) return;
     try {
       mCameraManager.setTorchMode(mCameraManager.getCameraIdList()[0], false);
+      flashOn = false;
     } catch (CameraAccessException | IllegalArgumentException e) {
     }
   }
