@@ -69,7 +69,7 @@ public class Api23Flashlight implements Flashlight {
 
       mCameraManager.setTorchMode(idList[0], false);
       flashOn = false;
-    } catch (CameraAccessException | IllegalArgumentException e) {
+    } catch (CameraAccessException | RuntimeException e) {
     }
   }
 }
